@@ -16,14 +16,7 @@ bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
     if (!buffer.get(c)) return false;
 
     std::string match(1, c);
-    u32 progress = buffer.tellg() >> 20;
     while (buffer.get(c)) {
-        // Progress
-        if (buffer.tellg() >> 20 > progress) {
-            progress = buffer.tellg() >> 20;
-            printf("%d MiB done\n", progress);
-        }
-
         // Find match
         std::string nextMatch = match;
         nextMatch.push_back(c);
@@ -71,14 +64,7 @@ bool LZW::decode(std::ifstream &buffer, std::ofstream &decoded)
 
     u32 code = 0x0000;                    // Current read code
     char c = table[previousCode][0];      // First read character in current match
-    u32 progress = buffer.tellg() >> 20;
     while (buffer.read((char*) &code, 3)) {
-        // Progress
-        if (buffer.tellg() >> 20 > progress) {
-            progress = buffer.tellg() >> 20;
-            printf("%d MiB done\n", progress);
-        }
-
         // Match the code
         std::string match;
         auto itr = table.find(code);

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include "LZW/LZW.hpp"
 
@@ -19,7 +18,6 @@ int main(int argc, char** argv)
         if (!LZW::decode(buffer, decoded)) return -1;
         buffer.close();
         decoded.close();
-
     }
     else {
         printf("USAGE: enwik8 encode|decode\n");
