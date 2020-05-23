@@ -36,7 +36,6 @@ bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
             encoded.put(code & 0xFF);
             encoded.put((code >> 8) & 0xFF);
             encoded.put((code >> 16) & 0xFF);
-            encoded.put((code >> 24) & 0xFF);
 
             // Append match + next undefined symbol
             table[nextMatch] = lastCode++;
@@ -50,7 +49,6 @@ bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
     encoded.put(code & 0xFF);
     encoded.put((code >> 8) & 0xFF);
     encoded.put((code >> 16) & 0xFF);
-    encoded.put((code >> 24) & 0xFF);
     return true;
 }
 
@@ -66,7 +64,7 @@ bool LZW::decode(std::ifstream &buffer, std::ofstream &decoded)
 
     // Start with first code
     u32 previousCode = 0x0000;
-    if (!buffer.read((char*) &previousCode, 4)) return false;
+    if (!buffer.read((char*) &previousCode, 3)) return false;
 
     // Decode first symbol
     decoded << table[previousCode];
@@ -74,7 +72,7 @@ bool LZW::decode(std::ifstream &buffer, std::ofstream &decoded)
     u32 code = 0x0000;                    // Current read code
     char c = table[previousCode][0];      // First read character in current match
     u32 progress = buffer.tellg() >> 20;
-    while (buffer.read((char*) &code, 4)) {
+    while (buffer.read((char*) &code, 3)) {
         // Progress
         if (buffer.tellg() >> 20 > progress) {
             progress = buffer.tellg() >> 20;
@@ -100,6 +98,7 @@ bool LZW::decode(std::ifstream &buffer, std::ofstream &decoded)
         table[lastCode] = table[previousCode];
         table[lastCode++].push_back(c);
         previousCode = code;
+        code = 0x0000;
     }
     return true;
 }
