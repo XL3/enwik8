@@ -15,7 +15,9 @@ public:
 
     // Encodes a given buffer
     static bool encode(std::ifstream &buffer, std::ofstream &encoded);
+    static bool encode(std::string buffer, std::string encoded);
 
     // Decodes a given buffer
     static bool decode(std::ifstream &buffer, std::ofstream &decoded);
+    static bool decode(std::string buffer, std::ofstream &decoded);
 };

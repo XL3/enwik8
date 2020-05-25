@@ -6,18 +6,12 @@ int main(int argc, char** argv)
 {
     if (argc > 1 && std::string(argv[1]) == std::string("encode")) {
         // Encode file
-        auto buffer = std::ifstream("../bin/enwik8");
-        std::ofstream encoded("../bin/encoded", std::ios_base::binary | std::ios_base::out);
-        if (!LZW::encode(buffer, encoded)) return -1;
-        buffer.close();
-        encoded.close();
+        if (!LZW::encode(std::string("../bin/enwik8"), std::string("../bin/encoded"))) return -1;
     }
     else if (argc > 1 && std::string(argv[1]) == std::string("decode")) {
         // Decode file
-        auto buffer = std::ifstream("../bin/encoded", std::ios_base::binary | std::ios_base::in);
         std::ofstream decoded("../bin/decoded", std::ios_base::binary | std::ios_base::out);
-        if (!LZW::decode(buffer, decoded)) return -1;
-        buffer.close();
+        if (!LZW::decode(std::string("../bin/encoded"), decoded)) return -1;
         decoded.close();
     }
     else {
