@@ -13,7 +13,7 @@ class OutputStream
     std::ofstream m_stream;
 
 public:
-    OutputStream(std::string filename, u8 bufferSize = 32);
+    OutputStream(const char* filename, u8 bufferSize = 32);
     ~OutputStream();
     void write(u32 value, u8 bits);
     void close();
@@ -28,7 +28,7 @@ class InputStream
     std::ifstream m_stream;
 
 public:
-    InputStream(std::string filename, u8 bufferSize = 32);
+    InputStream(const char* filename, u8 bufferSize = 32);
     ~InputStream();
     bool read(u32 &value, u8 bits);
     void close();

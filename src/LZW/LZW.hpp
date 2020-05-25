@@ -11,8 +11,8 @@ class LZW
 {
 public:
     // Encodes a given buffer
-    static bool encode(std::string buffer, std::string encoded);
+    static bool encode(const char* buffer, const char* encoded);
 
     // Decodes a given buffer
-    static bool decode(std::string buffer, std::ofstream &decoded);
+    static bool decode(const char* buffer, std::ofstream &decoded);
 };

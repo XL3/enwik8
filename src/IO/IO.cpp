@@ -2,7 +2,7 @@
 
 #define MIN(a, b) ((a < b) ? a : b)
 
-OutputStream::OutputStream(std::string filename, u8 bufferSize) :
+OutputStream::OutputStream(const char* filename, u8 bufferSize) :
     m_closed(false), m_buffer(0), m_freeBit(0), m_BUFFER_SIZE(bufferSize)
 {
     m_stream = std::ofstream(filename, std::ios_base::binary | std::ios_base::out);
@@ -51,7 +51,7 @@ void OutputStream::close() {
     }
 }
 
-InputStream::InputStream(std::string filename, u8 bufferSize) :
+InputStream::InputStream(const char* filename, u8 bufferSize) :
     m_closed(false), m_buffer(0), m_freeBit(0), m_BUFFER_SIZE(bufferSize)
 {
     m_stream = std::ifstream(filename, std::ios_base::binary | std::ios_base::in);
@@ -103,7 +103,7 @@ void InputStream::close()
 
 void test_IO()
 {
-    const std::string filename = "../bin/io";
+    const char* filename = "../bin/io";
     OutputStream ostr(filename);
     ostr.write(0xFAC688, 24);
     ostr.close();

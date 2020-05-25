@@ -1,7 +1,7 @@
 #include "LZW.hpp"
 #include "../IO/IO.hpp"
 
-bool LZW::encode(std::string buffer, std::string encoded)
+bool LZW::encode(const char* buffer, const char* encoded)
 {
     InputStream buf(buffer);
     OutputStream enc(encoded);
@@ -50,7 +50,7 @@ bool LZW::encode(std::string buffer, std::string encoded)
     return true;
 }
 
-bool LZW::decode(std::string buffer, std::ofstream &decoded)
+bool LZW::decode(const char* buffer, std::ofstream &decoded)
 {
     InputStream buf(buffer);
 
