@@ -20,9 +20,8 @@ void OutputStream::write(u32 value, u8 bits)
     while (bits) {
         // Place as many bits into the buffer from the value as you can
         // Mask by amount of bits needed to read
-        bitsToWrite = (value << m_freeBit) & BUFFER_MASK;
-        bitsToWrite &= (1u << bits) - 1;
-        m_buffer += bitsToWrite;
+        bitsToWrite = value & BUFFER_MASK & ((1ull << bits) - 1);
+        m_buffer += bitsToWrite << m_freeBit;
 
         // Shift the bits that were read out of the value
         // Read only remaining bits

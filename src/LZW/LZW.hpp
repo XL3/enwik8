@@ -10,14 +10,9 @@ typedef std::unordered_map<u32, std::string> mu32s;
 class LZW
 {
 public:
-    // Maximum dictionary size
-    static unsigned int MAX_CODE;
-
     // Encodes a given buffer
-    static bool encode(std::ifstream &buffer, std::ofstream &encoded);
     static bool encode(std::string buffer, std::string encoded);
 
     // Decodes a given buffer
-    static bool decode(std::ifstream &buffer, std::ofstream &decoded);
     static bool decode(std::string buffer, std::ofstream &decoded);
 };
