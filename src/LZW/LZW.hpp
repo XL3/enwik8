@@ -3,7 +3,6 @@
 #include <fstream>
 
 typedef unsigned char u8;
-typedef unsigned short u16;
 typedef unsigned int u32;
 typedef std::unordered_map<std::string, u32> msu32;
 typedef std::unordered_map<u32, std::string> mu32s;

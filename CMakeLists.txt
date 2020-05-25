@@ -8,6 +8,8 @@ add_executable(enwik8
   src/main.cpp
   src/LZW/LZW.hpp
   src/LZW/LZW.cpp
+  src/IO/IO.hpp
+  src/IO/IO.cpp
 )
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT enwik8)

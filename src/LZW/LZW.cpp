@@ -1,6 +1,6 @@
 #include "LZW.hpp"
 
-unsigned int LZW::MAX_CODE = 1u << 15;
+u32 LZW::MAX_CODE = 1u << 15;
 
 bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
 {
@@ -10,7 +10,8 @@ bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
     for (u32 i = 0; i < 0x100; i++) {
         table[std::string(1, char(i))] = i;
     }
-    u32 lastCode = 0x100;
+    table[std::string(1, '\0')] = 0x100;
+    u32 lastCode = 0x101;
 
     char c;
     if (!buffer.get(c)) return false;
@@ -42,6 +43,9 @@ bool LZW::encode(std::ifstream &buffer, std::ofstream &encoded)
     encoded.put(code & 0xFF);
     encoded.put((code >> 8) & 0xFF);
     encoded.put((code >> 16) & 0xFF);
+
+    // Encode EOF
+    u32 eof = 0x100;
     return true;
 }
 
@@ -53,7 +57,8 @@ bool LZW::decode(std::ifstream &buffer, std::ofstream &decoded)
     for (u32 i = 0; i < 0x100; i++) {
         table[i] = std::string(1, char(i));
     }
-    u32 lastCode = 0x0100;
+    table[0x100] = std::string(1, '\0');
+    u32 lastCode = 0x101;
 
     // Start with first code
     u32 previousCode = 0x0000;

@@ -1,11 +1,12 @@
 #include <fstream>
 #include "LZW/LZW.hpp"
+#include "IO/IO.hpp"
 
 int main(int argc, char** argv)
 {
     if (argc > 1 && std::string(argv[1]) == std::string("encode")) {
         // Encode file
-        auto buffer = std::ifstream ("../bin/enwik8");
+        auto buffer = std::ifstream("../bin/enwik8");
         std::ofstream encoded("../bin/encoded", std::ios_base::binary | std::ios_base::out);
         if (!LZW::encode(buffer, encoded)) return -1;
         buffer.close();
