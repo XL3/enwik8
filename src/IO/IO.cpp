@@ -64,7 +64,10 @@ InputStream::~InputStream()
 
 bool InputStream::read(u32 &value, u8 bits)
 {
-    if (m_stream.eof()) return false;
+    if (m_stream.eof()) {
+        close();
+        return false;
+    }
 
     value = 0;
     u32 bitsToRead = 0;
@@ -105,12 +108,21 @@ void test_IO()
 {
     const char* filename = "../bin/io";
     OutputStream ostr(filename);
-    ostr.write(0xFAC688, 24);
+    u32 num = 0xDEADBEEFu;
+    const u32 MSB_MASK = 0x80000000u;
+    for (int i = 0; i < 32; i++) {
+        const u32 w = (num & MSB_MASK) >> 31;
+        ostr.write(w, 1);
+        num <<= 1;
+    }
     ostr.close();
 
-    InputStream istr(filename, 24);
+    InputStream istr(filename);
     u32 value = 0;
-    while (istr.read(value, 3))
-        printf("%X\n", value);
+    for (int i = 31; i > -1; i--) {
+        istr.read(value, 1);
+        num += value << i;
+    }
+    printf("%X\n", num);
     istr.close();
 }
