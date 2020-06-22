@@ -80,7 +80,7 @@ bool InputStream::read(u32 &value, u8 bits)
 
         // Read as many bits as you can from the buffer
         // Place read bits properly into value
-        bitsToRead = m_buffer & ((1u << MIN(bits, m_freeBit)) - 1);
+        bitsToRead = m_buffer & ((1ull << MIN(bits, m_freeBit)) - 1);
         value += bitsToRead << numBitsRead;
         numBitsRead = MIN(bits, m_freeBit);
 

@@ -47,6 +47,7 @@ bool LZW::encode(const char* buffer, const char* encoded)
     // Encode EOF
     u32 eof = 0x100;
     enc.write(eof, bitsPerCode);
+    
     return true;
 }
 
