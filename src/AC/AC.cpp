@@ -27,15 +27,10 @@ bool AC::encode(const char* buffer, const char* encoded)
     u32 lower = 0x00000000u;
 
     u32 numHangingBits = 0;
-    const auto write_bits = [&](u8 bit) {
+    const auto write_bits = [&](u32 bit) {
         enc.write(bit, 1);
-        while (numHangingBits) {
-            enc.write(~bit, 1);
-            numHangingBits--;
-        }
-
-        lower <<= 1;
-        upper <<= 1; upper |= 1;
+        enc.write(bit ? 0 : ~bit, numHangingBits);
+        numHangingBits = 0;
     };
 
     u32 symbol;
@@ -47,12 +42,19 @@ bool AC::encode(const char* buffer, const char* encoded)
         while (true) {
             if (upper < LIMITS.half) {
                 write_bits(0);
+
+                lower <<= 1;
+                upper <<= 1; upper |= 1;
             }
             else if (lower >= LIMITS.half) {
                 write_bits(1);
+
+                lower <<= 1;
+                upper <<= 1; upper |= 1;
             }
             else if (lower >= LIMITS.low && upper < LIMITS.high) {
                 numHangingBits++;
+
                 upper <<= 1; upper |= (LIMITS.half + 1);
                 lower <<= 1; lower &= (LIMITS.half - 1);
             }
@@ -69,8 +71,10 @@ bool AC::encode(const char* buffer, const char* encoded)
 
     // Terminate encoding
     for (u32 i = 0; i < 32; i++) {
-        u8 b = (lower & LIMITS.half) >> 31; // MSB to LSB
+        u32 b = (lower & LIMITS.half) >> 31; // MSB to LSB
         write_bits(b);
+
+        lower <<= 1;
     }
 
     return true;
@@ -131,33 +135,33 @@ bool AC::decode(const char* buffer, const char* decoded)
     }
 
     printf("Decoding..\n");
-    while (true) {
+    bool readingFromFile = true;
+    while (readingFromFile) {
         const u64 range = upper - lower + (u64)1;
         const u64 subrange = tag - lower + (u64)1;
         const u64 subfreq = (subrange * cfreq[__EOF] - 1) / range;
 
         u32 symbol = get_symbol(subfreq);
-        update_cfreq(symbol);
 
         if (symbol == __EOF) return true;
         dec.write(symbol, 8);
 
         upper = lower + (range * cfreq[symbol]) / cfreq[__EOF] - 1;
         lower = lower + (range * cfreq[symbol-1]) / cfreq[__EOF];
+        update_cfreq(symbol);
 
-        bool doneWithFile = false;
-        while (!doneWithFile) {
+        while (true) {
             if (upper < LIMITS.half || lower >= LIMITS.half) {
                 upper <<= 1; upper |= 1;
                 lower <<= 1;
 
-                doneWithFile = update_tag();
+                readingFromFile = update_tag();
             } 
             else if (lower >= LIMITS.low && upper < LIMITS.high) {
                 upper <<= 1; upper |= (LIMITS.half+1);
                 lower <<= 1; lower &= (LIMITS.half-1);
 
-                doneWithFile = update_tag();
+                readingFromFile = update_tag();
                 tag ^= LIMITS.half;
             }
             else break;
