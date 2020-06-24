@@ -1,22 +1,15 @@
 #include "AC.hpp"
 #include "../IO/IO.hpp"
 
+const u32 __EOF = 0x100;
+
+ModelInterface *AC::model = nullptr;
+
 bool AC::encode(const char* buffer, const char* encoded)
 {
     InputStream buf(buffer);
     OutputStream enc(encoded);
-
-    // Initialize cumulative frequency
-    u32 cfreq[0x101] = {};
-    const u32 __EOF = 0x100u;
-    for (u32 i = 1; i < 0x101; ++i) cfreq[i] = 1 + cfreq[i-1];
-
-    // Updates cumulative frequency
-    const auto update_cfreq = [&](u32 symbol) {
-        for (u32 i = symbol; i < 0x101; ++i) {
-            cfreq[i]++;
-        }
-    };
+    model->reset_model();
 
     // Range limits, bounds
     struct {
@@ -40,8 +33,8 @@ bool AC::encode(const char* buffer, const char* encoded)
     // Encodes a given symbol, updates range bounds
     const auto encode_symbol = [&](u32 s) {
         const u64 range = upper - lower + (u64)1;
-        upper = lower + (range * cfreq[s]) / cfreq[__EOF] - 1;
-        lower = lower + (range * cfreq[s-1]) / cfreq[__EOF];
+        upper = lower + (range * model->get_frequency(s)) / model->get_frequency(__EOF) - 1;
+        lower = lower + (range * model->get_frequency(s-1)) / model->get_frequency(__EOF);
 
         while (true) {
             // Converging above
@@ -72,7 +65,7 @@ bool AC::encode(const char* buffer, const char* encoded)
     printf("Encoding..\n");
     while (buf.read(symbol, 8)) {
         encode_symbol(symbol);
-        update_cfreq(symbol);
+        model->update_model(symbol);
     }
     encode_symbol(__EOF);
 
@@ -91,25 +84,7 @@ bool AC::decode(const char* buffer, const char* decoded)
 {
     InputStream buf(buffer);
     OutputStream dec(decoded);
-
-    // Initialize cumulative frequency
-    u32 cfreq[0x101] = {};
-    const u32 __EOF = 0x100;
-    for (u32 i = 1; i < 0x101; ++i) cfreq[i] = 1 + cfreq[i-1];
-
-    // Updates cumulative frequency
-    const auto update_cfreq = [&](u32 symbol) {
-        for (u32 i = symbol; i < 0x101; ++i) {
-            cfreq[i]++;
-        }
-    };
-    // Gets the upper bound symbol for a given frequency
-    const auto get_symbol = [&](u64 subfreq) {
-        for (u32 s = 1; s < 0x101; s++) {
-            if (subfreq < cfreq[s]) return s;
-        }
-        return 0x101u;
-    };
+    model->reset_model();
 
     // Range limits, bounds
     struct {
@@ -148,15 +123,15 @@ bool AC::decode(const char* buffer, const char* decoded)
     while (readingFromFile) {
         const u64 range = upper - lower + (u64)1;
         const u64 subrange = tag - lower + (u64)1;
-        const u64 subfreq = (subrange * cfreq[__EOF] - 1) / range;
+        const u64 subfreq = (subrange * model->get_frequency(__EOF) - 1) / range;
 
-        u32 symbol = get_symbol(subfreq);
+        u32 symbol = model->get_symbol(subfreq);
         if (symbol == __EOF) return true;
         dec.write(symbol, 8);
 
-        upper = lower + (range * cfreq[symbol]) / cfreq[__EOF] - 1;
-        lower = lower + (range * cfreq[symbol-1]) / cfreq[__EOF];
-        update_cfreq(symbol);
+        upper = lower + (range * model->get_frequency(symbol)) / model->get_frequency(__EOF) - 1;
+        lower = lower + (range * model->get_frequency(symbol-1)) / model->get_frequency(__EOF);
+        model->update_model(symbol);
 
         while (true) {
             // Converging

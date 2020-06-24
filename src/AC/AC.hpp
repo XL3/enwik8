@@ -1,18 +1,19 @@
 #pragma once
 #include <unordered_map>
 #include <fstream>
-
-typedef unsigned char u8;
-typedef unsigned int u32;
-typedef unsigned long long u64;
+#include "Model/ModelInterface.hpp"
 
 // Arithmetic Coding
 class AC
 {
 public:
+	// Derived Probability Model class
+	static ModelInterface *model;
+
     // Encodes a given buffer
     static bool encode(const char* buffer, const char* encoded);
 
     // Decodes a given buffer
     static bool decode(const char* buffer, const char* decoded);
 };
+

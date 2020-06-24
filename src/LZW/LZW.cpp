@@ -1,5 +1,5 @@
 #include "LZW.hpp"
-#include "../IO/IO.hpp"
+#include "IO/IO.hpp"
 
 bool LZW::encode(const char* buffer, const char* encoded)
 {
